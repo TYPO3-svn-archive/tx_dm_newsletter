@@ -1,3 +1,6 @@
-2009-03-18 Antoine CATHELIN  <anc@wcc-coe.org>
-
-	* initial code generated with kickstarter
+2009-05-01 Antoine CATHELIN  <anc@wcc-coe.org>
+	* Version 0.1.1
+	* Fix language for the moment to default language.
+2009-04-30 Antoine CATHELIN  <anc@wcc-coe.org>
+	* Version 0.1.0
+	* Initial release.

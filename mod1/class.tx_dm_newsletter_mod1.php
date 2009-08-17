@@ -1471,10 +1471,11 @@ class  tx_dm_newsletter_mod1 extends t3lib_SCbase {
 	 */
 		function createCategoriesList($fields, $table, $whereClause, $press, $order, $style) {
 			global  $TYPO3_DB, $LANG;
-
+			$out!='';
+			
 			$res = $TYPO3_DB->exec_SELECTquery($fields, $table, $whereClause, '', $order);
 
-			$out.='<ul style="'.$style.'">';
+			$tmp.='<ul style="'.$style.'">';
 			while($row = $TYPO3_DB->sql_fetch_assoc($res))	{
 				$out.='<li>';
 				$out.='<input style="margin-right: 5px;margin-top: 3px;" type="checkbox" name="'.urlencode($row['category']).'" value="'.$row['uid'].'" title="'.$row['user_feuserextension_description'].'">'.$row['category'].'</input>';
@@ -1489,7 +1490,12 @@ class  tx_dm_newsletter_mod1 extends t3lib_SCbase {
 				if ($res2) $out.='</ul>';
 				$out.='</li>';
 			};
-			$out.='</ul>';
+			if ($out!='') { // test if there are some catagories, if dont found categories we return a blanc string
+				$tmp.=$out;
+				$out=$tmp;
+				$out.='</ul>';
+			};
+			
 
 			return $out;
 		}
@@ -1501,21 +1507,32 @@ class  tx_dm_newsletter_mod1 extends t3lib_SCbase {
 	 * @return	string		HTML form showing the categories
 	 */
 	function createCategoriesForm() {
-		global $BACK_PATH, $TYPO3_DB, $LANG;
+		global $BACK_PATH, $TYPO3_DB, $LANG, $TSFE, $TCA;
+		
 		$out = "";
+		$tmpOut = "";
+		$commonWhereClause = ' and user_feuserextension_parent=0 and hidden=0 and deleted=0 and sys_language_uid=0';
+		
+		//$out.=$GLOBALS[“TSFE”]->sys_language_uid.'<---';
 		// all
-		$whereClause = 'user_feuserextension_parent=0 and user_feuserextension_press=0 and hidden=0';
+		$whereClause = 'user_feuserextension_press=0';
+		$whereClause .= $commonWhereClause;
+		//t3lib_div::debug($whereClause);
 		$style = 'list-style:none; margin-left: 0;padding-left:0;';
 		$out.='<div style="float:left">';
 		$out.=$this->createCategoriesList('*', 'sys_dmail_category', $whereClause, 0, 'user_feuserextension_order', $style);
 		$out.='</div>';
 		// press
-		$whereClause = 'user_feuserextension_parent=0 and user_feuserextension_press=1  and hidden=0';
-		$style = 'list-style:none; margin-left: 0;padding-left:0;';
-		$out.='<div style="float:left; border: 1px solid #AAAAAA; padding-left: 10px;margin-left: 10px; padding-right: 10px">';
-		$out.='<p style="color:red; font-weight:bold; font-size: 1.2em">'.$LANG->getLL('press_only').'</p>';
-		$out.=$this->createCategoriesList('*', 'sys_dmail_category', $whereClause, 1, 'user_feuserextension_order', $style);
-		$out.='</div>';
+		$whereClause = 'user_feuserextension_press=1';
+		$whereClause .= $commonWhereClause;
+		$tmpOut = $this->createCategoriesList('*', 'sys_dmail_category', $whereClause, 1, 'user_feuserextension_order', $style);
+		if ($tmpOut!='') {
+			$style = 'list-style:none; margin-left: 0;padding-left:0;';
+			$out.='<div style="float:left; border: 1px solid #AAAAAA; padding-left: 10px;margin-left: 10px; padding-right: 10px">';
+			$out.='<p style="color:red; font-weight:bold; font-size: 1.2em">'.$LANG->getLL('press_only').'</p>';
+			$out.=$tmpOut;
+			$out.='</div>';
+		};
 		//end
 		$out.='<div style="clear:both">'.$LANG->getLL('dm_01').'<input  style="margin-left:10px;margin-bottom:5px;" name="rlName" type="text" value="'.date('d').'-'.date('m').'-'.date('Y').' '.date('H').':'.date('i').'"></div>';
 		$out.='<div>'.$LANG->getLL('dm_02').'<input style="margin-left:63px;margin-bottom:5px;width: 300px;"  name="rlDesc" type="text" value=""></div>';
